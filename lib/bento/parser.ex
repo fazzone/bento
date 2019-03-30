@@ -29,20 +29,22 @@ defmodule Bento.Parser do
 
   @type t :: integer | String.t | list | map
 
-  @spec parse(iodata) :: {:ok, t} | {:error, :invalid}
-    | {:error, {:invalid, String.t}}
+  @spec parse(iodata) :: {:ok, t} | {:error, :invalid} | {:error, {:invalid, String.t}}
   def parse(iodata) do
-    {value, rest} = iodata |> IO.iodata_to_binary() |> parse_value()
-
-    case rest do
-      "" -> {:ok, value}
-      other -> syntax_error(other)
+    case parse_partial(iodata) do
+      {:ok, p, ""}   -> {:ok, p}
+      {:ok, p, extra} -> {:invalid, "unexpected #{extra}"}
+      other -> other
     end
+  end
+
+  @spec parse_partial(iodata) :: {:ok, t, t} | {:error, :invalid} | {:error, {:invalid, String.t}}
+  def parse_partial(iodata) do
+    {value, rest} = iodata |> IO.iodata_to_binary() |> parse_value()
+    {:ok, value, rest}
   catch
-    :invalid ->
-      {:error, :invalid}
-    {:invalid, token} ->
-      {:error, {:invalid, token}}
+    :invalid          -> {:error, :invalid}
+    {:invalid, token} -> {:error, {:invalid, token}}
   end
 
   @spec parse!(iodata) :: t
