@@ -103,4 +103,17 @@ defmodule Bento do
     decoded = decode!(iodata, as: %Metainfo.Torrent{})
     struct(decoded, ["info": Metainfo.info!(decoded)])
   end
+
+
+  @doc """
+  Like `decode`, but also returns the remaining unparsed string.
+
+      iex> Bento.decode_partial("dede")
+      {:ok, %{}, "de"}
+  """
+  def decode_partial(iodata) do
+    with {:ok, parsed, more} <- Parser.parse_partial(iodata),
+      do: {:ok, Poison.Decode.decode(parsed, options), more}
+  end
+
 end
