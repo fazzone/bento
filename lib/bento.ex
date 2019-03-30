@@ -111,7 +111,7 @@ defmodule Bento do
       iex> Bento.decode_partial("dede")
       {:ok, %{}, "de"}
   """
-  def decode_partial(iodata) do
+  def decode_partial(iodata, options \\ []) do
     with {:ok, parsed, more} <- Parser.parse_partial(iodata),
       do: {:ok, Poison.Decode.decode(parsed, options), more}
   end
